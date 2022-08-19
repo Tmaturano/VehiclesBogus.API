@@ -1,15 +1,17 @@
 ﻿using Bogus;
-using VehiclesBogus.API.Enums;
-using VehiclesBogus.API.Models;
 using Bogus.Extensions.Canada;
+using VehiclesBogus.API.DTOs;
+using VehiclesBogus.API.Enums;
+using VehiclesBogus.API.Extensions;
+using VehiclesBogus.API.Models;
 
 namespace VehiclesBogus.API.Data
 {
     public interface IVehicleRepository
     {
-        public List<Car> GetCars();
-        public List<MotorCycle> GetMotorCycles();
-        public List<Truck> GetTrucks();
+        public List<CarDto> GetCars();
+        public List<MotorCycleDto> GetMotorCycles();
+        public List<TruckDto> GetTrucks();
     }
 
     public class VehicleRepository : IVehicleRepository
@@ -27,20 +29,9 @@ namespace VehiclesBogus.API.Data
             _configuration = configuration;
             _vehicleNumbers = Convert.ToInt32(_configuration["vehicleNumbers"]);
             _language = _configuration["lang"];
-        }
+        }      
 
-        //public List<Vehicle> GetAll(VehicleType vehicleType)
-        //{
-        //    return vehicleType switch
-        //    {
-        //        VehicleType.Car => new List<Vehicle>(GetCars()),
-        //        VehicleType.Motorcycle => new List<Vehicle>(GetMotorCycles()),
-        //        VehicleType.Truck => new List<Vehicle>(GetTrucks()),
-        //        _ => new List<Vehicle>(),
-        //    };
-        //}
-
-        public List<Car> GetCars()
+        public List<CarDto> GetCars()
         {           
             _logger.LogInformation($"Generating {_vehicleNumbers} vehicle(s) data...");
 
@@ -49,21 +40,21 @@ namespace VehiclesBogus.API.Data
                 .RuleFor(p => p.Sin, f => f.Person.Sin())
                 .RuleFor(c => c.Email, (f, c) => f.Person.Email);
 
-            return new Faker<Car>(_language).StrictMode(true)
+            return new Faker<CarDto>(_language).StrictMode(true)
                 .RuleFor(p => p.Model, f => f.Vehicle.Model())
                 .RuleFor(p => p.Manufacturer, f => f.Vehicle.Manufacturer())
-                .RuleFor(p => p.HorsePower, f => f.Random.Int())
-                .RuleFor(p => p.CarType, f => f.PickRandom<CarType>())
+                .RuleFor(p => p.HorsePower, f => f.Random.Int(80, 1000))
+                .RuleFor(p => p.CarType, f => f.PickRandom<CarType>().GetEnumDescription())
                 .RuleFor(p => p.Color, f => f.Commerce.Color())
-                .RuleFor(p => p.Transmission, f => f.PickRandom<Transmission>())
+                .RuleFor(p => p.Transmission, f => f.PickRandom<Transmission>().GetEnumDescription())
                 .RuleFor(p => p.VehicleType, VehicleType.Car)
-                .RuleFor(p => p.Weight, f => f.Vehicle.Random.Decimal())
+                .RuleFor(p => p.Weight, f => f.Vehicle.Random.Decimal(700, 2000))
                 .RuleFor(p => p.Year, f => f.Date.Past().Year)
                 .RuleFor(p => p.Owner, f => owners.Generate())
                 .Generate(_vehicleNumbers);
         }
 
-        public List<MotorCycle> GetMotorCycles()
+        public List<MotorCycleDto> GetMotorCycles()
         {
             var _vehicleNumbers = Convert.ToInt32(_configuration["vehicleNumbers"]);
             var _language = _configuration["lang"];
@@ -74,21 +65,21 @@ namespace VehiclesBogus.API.Data
                 .RuleFor(p => p.Sin, f => f.Person.Sin())
                 .RuleFor(c => c.Email, (f, c) => f.Person.Email);
 
-            return new Faker<MotorCycle>(_language).StrictMode(true)
+            return new Faker<MotorCycleDto>(_language).StrictMode(true)
                 .RuleFor(p => p.Model, f => f.Vehicle.Model())
                 .RuleFor(p => p.Manufacturer, f => f.Vehicle.Manufacturer())
-                .RuleFor(p => p.HorsePower, f => f.Random.Int())
-                .RuleFor(p => p.MotorCycleType, f => f.PickRandom<MotorCycleType>())
+                .RuleFor(p => p.HorsePower, f => f.Random.Int(100, 500))
+                .RuleFor(p => p.MotorCycleType, f => f.PickRandom<MotorCycleType>().GetEnumDescription())
                 .RuleFor(p => p.Color, f => f.Commerce.Color())
                 .RuleFor(p => p.VehicleType, VehicleType.Motorcycle)
-                .RuleFor(p => p.Weight, f => f.Vehicle.Random.Decimal())
+                .RuleFor(p => p.Weight, f => f.Vehicle.Random.Decimal(100, 700))
                 .RuleFor(p => p.Year, f => f.Date.Past().Year)
                 .RuleFor(p => p.CubicCentimeters, f => f.Random.Int())
                 .RuleFor(p => p.Owner, f => owners.Generate())
                 .Generate(_vehicleNumbers);
         }
 
-        public List<Truck> GetTrucks()
+        public List<TruckDto> GetTrucks()
         {
             var _vehicleNumbers = Convert.ToInt32(_configuration["vehicleNumbers"]);
             var _language = _configuration["lang"];
@@ -99,14 +90,14 @@ namespace VehiclesBogus.API.Data
                 .RuleFor(p => p.Sin, f => f.Person.Sin())
                 .RuleFor(c => c.Email, (f, c) => f.Person.Email);
 
-            return new Faker<Truck>(_language).StrictMode(true)
+            return new Faker<TruckDto>(_language).StrictMode(true)
                 .RuleFor(p => p.Model, f => f.Vehicle.Model())
                 .RuleFor(p => p.Manufacturer, f => f.Vehicle.Manufacturer())
-                .RuleFor(p => p.HorsePower, f => f.Random.Int())
-                .RuleFor(p => p.TruckType, f => f.PickRandom<TruckType>())
+                .RuleFor(p => p.HorsePower, f => f.Random.Int(100, 500))
+                .RuleFor(p => p.TruckType, f => f.PickRandom<TruckType>().GetEnumDescription())
                 .RuleFor(p => p.Color, f => f.Commerce.Color())
                 .RuleFor(p => p.VehicleType, VehicleType.Truck)
-                .RuleFor(p => p.Weight, f => f.Vehicle.Random.Decimal())
+                .RuleFor(p => p.Weight, f => f.Vehicle.Random.Decimal(1000, 4000))
                 .RuleFor(p => p.Year, f => f.Date.Past().Year)
                 .RuleFor(p => p.Axles, f => f.Random.Int())
                 .RuleFor(p => p.Owner, f => owners.Generate())
